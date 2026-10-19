@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#080d1f">
+<title>Neon Tap — Mi primer videojuego</title>
+<style>
+:root{--bg:#080d1f;--panel:#111a35;--line:#26365d;--cyan:#65f4ff;--pink:#ff5ec4;--yellow:#ffe66d;--white:#f3f7ff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#203d70 0%,var(--bg) 60%);color:var(--white);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;justify-content:center}
+main{width:min(100%,760px);padding:22px 15px 35px}
+header{text-align:center;padding:12px 5px 18px}
+.kicker{color:var(--cyan);font-weight:800;letter-spacing:.2em;font-size:.75rem;text-transform:uppercase}
+h1{font-size:clamp(2.2rem,9vw,4rem);line-height:1;margin:10px 0 8px;letter-spacing:-.04em}
+h1 span{color:var(--pink);text-shadow:0 0 25px #ff5ec455}
+header p{margin:0;color:#b7c4e4}
+.panel{background:#101a33d9;border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:0 18px 45px #0004}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#0a1229;border:1px solid #26365d;border-radius:13px;text-align:center;padding:9px 4px}
+.stat small{display:block;color:#a9b9df;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+.stat strong{font-size:1.55rem;font-variant-numeric:tabular-nums}
+#score{color:var(--cyan)}#time{color:var(--yellow)}#best{color:var(--pink)}
+.arena{position:relative;height:min(54vh,430px);min-height:300px;border-radius:17px;overflow:hidden;border:1px solid #30456d;background:radial-gradient(circle at 50% 50%,#17264c,#080e22 72%);touch-action:manipulation}
+.arena:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#5b80c015 1px,transparent 1px),linear-gradient(90deg,#5b80c015 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.target{position:absolute;width:62px;height:62px;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 4%,var(--cyan) 10%,#17a9f2 45%,#1764a9 72%);box-shadow:0 0 12px #65f4ff,0 0 32px #1eb7f288;transform:translate(-50%,-50%);display:none;cursor:pointer;touch-action:manipulation;animation:pop .16s ease-out}
+.target:after{content:"";position:absolute;inset:8px;border:2px solid #ffffff99;border-radius:50%}
+.target.pink{background:radial-gradient(circle at 35% 30%,#fff 0 4%,#ff9bdd 10%,var(--pink) 48%,#a52a94 75%);box-shadow:0 0 12px var(--pink),0 0 32px #ff5ec488}
+@keyframes pop{from{scale:.4;opacity:.5}to{scale:1;opacity:1}}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;background:#070c1dc9;backdrop-filter:blur(3px)}
+.overlay[hidden]{display:none}
+.overlay-card{max-width:330px}
+.overlay h2{font-size:1.7rem;margin:0 0 8px}
+.overlay p{color:#c1cce7;margin:0 0 16px}
+button.action{width:100%;border:0;border-radius:13px;padding:14px 18px;font-weight:900;font-size:1rem;color:#071020;background:linear-gradient(100deg,var(--cyan),#a7fff3);box-shadow:0 5px 0 #247e99;cursor:pointer}
+button.action:active{transform:translateY(2px);box-shadow:0 3px 0 #247e99}
+.hint{text-align:center;color:#aebfe2;font-size:.88rem;margin:12px 4px 0}
+.instructions{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tip{background:#0b142a;border:1px solid #24365a;border-radius:12px;padding:11px;font-size:.83rem;color:#c2cee9}
+.tip b{display:block;color:var(--white);margin-bottom:3px}
+footer{text-align:center;color:#7f91b8;font-size:.78rem;margin-top:18px}
+@media(min-width:600px){main{padding-top:35px}.panel{padding:20px}.arena{height:410px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="kicker">Mi primer videojuego · HTML + CSS + JavaScript</div>
+<h1>NEON <span>TAP</span></h1>
+<p>Reflejos rápidos. Un dedo. Treinta segundos.</p>
+</header>
+<section class="panel" aria-label="Juego Neon Tap">
+<div class="stats">
+ <div class="stat"><small>Puntos</small><strong id="score">0</strong></div>
+ <div class="stat"><small>Tiempo</small><strong id="time">30</strong></div>
+ <div class="stat"><small>Récord</small><strong id="best">0</strong></div>
+</div>
+<div class="arena" id="arena">
+ <button class="target" id="target" aria-label="Toca el objetivo para sumar puntos"></button>
+ <div class="overlay" id="overlay">
+  <div class="overlay-card">
+   <h2 id="overlayTitle">¿Listo para jugar?</h2>
+   <p id="overlayText">Toca los círculos brillantes tantas veces como puedas antes de que termine el tiempo. ¡Ojo con los objetivos rosas: valen 3 puntos!</p>
+   <button class="action" id="start">JUGAR</button>
+  </div>
+ </div>
+</div>
+<p class="hint" id="hint">Toca JUGAR para comenzar la partida.</p>
+<div class="instructions">
+ <div class="tip"><b>🔵 Círculo azul</b>+1 punto por toque.</div>
+ <div class="tip"><b>💗 Círculo rosa</b>+3 puntos. ¡A por él!</div>
+</div>
+</section>
+<footer>Hecho para jugar desde el iPhone · Proyecto inicial para GitHub Pages</footer>
+</main>
+<script>
+(() => {
+ const arena=document.getElementById('arena');
+ const target=document.getElementById('target');
+ const overlay=document.getElementById('overlay');
+ const start=document.getElementById('start');
+ const scoreEl=document.getElementById('score');
+ const timeEl=document.getElementById('time');
+ const bestEl=document.getElementById('best');
+ const titleEl=document.getElementById('overlayTitle');
+ const textEl=document.getElementById('overlayText');
+ const hint=document.getElementById('hint');
+ let score=0, seconds=30, playing=false, timer=null, pink=false;
+ let best=0;
+ try{best=Number(localStorage.getItem('neonTapBest')||0)}catch(e){}
+ bestEl.textContent=best;
+ function placeTarget(){
+   const pad=38, w=arena.clientWidth, h=arena.clientHeight;
+   target.style.left=(pad+Math.random()*Math.max(1,w-pad*2))+'px';
+   target.style.top=(pad+Math.random()*Math.max(1,h-pad*2))+'px';
+   pink=Math.random()<0.22;
+   target.classList.toggle('pink',pink);
+   target.style.display='block';
+ }
+ function finish(){
+   playing=false;clearInterval(timer);timer=null;target.style.display='none';
+   const newRecord=score>best;
+   if(newRecord){best=score;bestEl.textContent=best;try{localStorage.setItem('neonTapBest',String(best))}catch(e){}}
+   titleEl.textContent=newRecord&&score>0?'¡NUEVO RÉCORD!':'¡PARTIDA TERMINADA!';
+   textEl.textContent=`Hiciste ${score} ${score===1?'punto':'puntos'}. ${score>=35?'¡Reflejos de élite!':score>=20?'¡Muy buen ritmo!':'¡Una más y superas tu marca!'}`;
+   start.textContent='JUGAR OTRA VEZ';overlay.hidden=false;
+   hint.textContent='Partida terminada. ¿Puedes superar tu récord?';
+ }
+ function begin(){
+   score=0;seconds=30;playing=true;scoreEl.textContent=score;timeEl.textContent=seconds;
+   overlay.hidden=true;hint.textContent='¡Dale! Los círculos rosas valen 3 puntos.';
+   placeTarget();clearInterval(timer);
+   timer=setInterval(()=>{seconds--;timeEl.textContent=seconds;if(seconds<=0)finish()},1000);
+ }
+ target.addEventListener('pointerdown',e=>{
+   e.preventDefault();if(!playing)return;
+   score+=pink?3:1;scoreEl.textContent=score;
+   if(navigator.vibrate)navigator.vibrate(12);
+   placeTarget();
+ });
+ start.addEventListener('click',begin);
+ window.addEventListener('resize',()=>{if(playing)placeTarget()});
+})();
+</script>
+</body>
+</html>
